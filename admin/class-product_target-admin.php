@@ -51,8 +51,69 @@ class Product_target_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		add_action('admin_menu', array($this,'product_target_register_options_page'));
+		add_action( 'admin_init', array($this,'register_product_target_settings'));
 
 	}
+	public function product_target_register_options_page() {
+	  add_menu_page('Product target', 'Product target settings', 'manage_options', 'product_setting',  array($this,'product_target_options_page'));
+	}
+	
+	public function register_product_target_settings() {
+		//register our settings
+		register_setting( 'product_target-settings-group', 'product_target_field' );
+	}
+	/**
+	 * Creating html of option page
+	 *
+	 */
+	public function product_target_options_page()
+	{
+		?>
+		  <div>
+			  <h2><?php _e( "Product Target Setting", "product_target" ); ?></h2>
+			  	<!-- Starting of option form -->
+				<form method="post" action="options.php">
+					<?php settings_fields( 'product_target-settings-group' ); ?>
+    				<?php do_settings_sections( 'product_target-settings-group' ); ?>
+
+					  <h3><?php _e( "Default product target category", "product_target" ); ?></h3>
+
+					  <?php 
+					  // get all terms inside target_groups taxonomy
+					  $terms = get_terms( array(
+						    'taxonomy' => 'target_groups',
+						    'hide_empty' => false,
+						) );
+					  ?>
+					  <?php
+					  	// Verify target_groups has terms. 
+					  	if (count($terms) > 0){
+					  ?>
+					  	<select name="product_target_field">
+						  	<option value="0"><?php _e( "Select product target", "product_target" ); ?></option>
+
+						  	<?php foreach ($terms as $term) { ?>
+
+						  		<option value="<?php echo $term->term_id ?>" <?php  echo ($term->term_id == esc_attr( get_option('product_target_field') ) ) ? "selected" : "" ; ?>>
+
+						  			<?php echo $term->name ?>	
+
+						  		</option>
+						  		
+						  	<?php } ?>
+						 </select>
+					  <?php }else{ ?>
+
+					  			<p><?php _e( "the products doesn't have any product target group", "product_target" ); ?></p>
+
+					  <?php }?>
+					  
+			  	  <?php  submit_button(); ?>
+			  </form>
+		  </div>
+		<?php
+	} 
 
 	/**
 	 * Register the stylesheets for the admin area.
