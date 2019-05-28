@@ -126,6 +126,8 @@ class Product_target {
 
 		add_action( 'init', array($this , 'product_CPT' ), 0 );
 		add_action( 'init', array($this , 'create_target_groups_hierarchical_taxonomy' ) );
+		add_action( 'save_post', array($this ,'save_rating_field_meta_box_data') );
+		add_filter( 'the_content', array($this ,'rating_field_before_post') );
 
 	}
 
@@ -215,7 +217,113 @@ class Product_target {
 	  ));
 
 	}
-	
+
+		/**
+	 * Add rating filed meta box
+	 *
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
+	public function rating_field_meta_box() {
+
+	    add_meta_box(
+	        'rating-meta',
+	        __( 'Rating', 'sitepoint' ),
+	        array($this,'rating_field_meta_box_callback'),
+	        'product',
+	        'side',
+	        'core'
+	    );
+
+	}
+
+	/**
+	 * Add HTML rating filed to meta box 
+	 *
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
+
+	public function rating_field_meta_box_callback( $post ) {
+
+	    // Add a nonce field so we can check for it later.
+	    wp_nonce_field( 'rating_field_nonce', 'rating_field_nonce' );
+
+	    $value = get_post_meta( $post->ID, 'rating_field', true );
+	    if (!empty($value)&& $value != '') {
+	    	echo '<input type="number" id="rating_field" name="rating_field" min="1" max="5" value="'.esc_attr( $value ) .'"> ';
+	    }else{
+	    	echo '<input type="number" id="rating_field" name="rating_field" min="1" max="5" value="1"> ';
+	    }
+
+	    
+	}
+
+	/**
+	 * When the post is saved, saves our custom data.
+	 *
+	 * @param int $post_id
+	 */
+	public function save_rating_field_meta_box_data( $post_id ) {
+
+	    // Check if our nonce is set.
+	    if ( ! isset( $_POST['rating_field_nonce'] ) ) {
+	        return;
+	    }
+
+	    // Verify that the nonce is valid.
+	    if ( ! wp_verify_nonce( $_POST['rating_field_nonce'], 'rating_field_nonce' ) ) {
+	        return;
+	    }
+
+	    // If this is an autosave, our form has not been submitted, so we don't want to do anything.
+	    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+	        return;
+	    }
+
+	    // Check the user's permissions.
+	    if ( isset( $_POST['post_type'] ) && 'page' == $_POST['post_type'] ) {
+
+	        if ( ! current_user_can( 'edit_page', $post_id ) ) {
+	            return;
+	        }
+
+	    }
+	    else {
+
+	        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+	            return;
+	        }
+	    }
+
+	    // Make sure that it is set.
+	    if ( ! isset( $_POST['rating_field'] ) ) {
+	        return;
+	    }
+
+	    // Sanitize user input.
+	    $my_data = sanitize_text_field( $_POST['rating_field'] );
+
+	    // Update the meta field in the database.
+	    update_post_meta( $post_id, 'rating_field', $my_data );
+	}
+
+
+	public function rating_field_before_post( $content ) {
+
+	    global $post;
+
+	    // retrieve the Rating for the current post
+	    $rating_field = esc_attr( get_post_meta( $post->ID, 'rating_field', true ) );
+
+	    $notice = "<div class='sp_rating_field'>$rating_field</div>";
+
+	    return $notice . $content;
+
+	}
+
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
