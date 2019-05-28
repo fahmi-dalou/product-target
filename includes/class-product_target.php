@@ -124,8 +124,98 @@ class Product_target {
 
 		$this->loader = new Product_target_Loader();
 
+		add_action( 'init', array($this , 'product_CPT' ), 0 );
+		add_action( 'init', array($this , 'create_target_groups_hierarchical_taxonomy' ) );
+
 	}
 
+	/**
+	 * Create Product CPT
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
+
+	 
+	public function product_CPT() {
+	 
+	// Set UI labels for Custom Post Type
+	    $labels = array(
+	        'name'                => _x( 'Products', 'Post Type General Name', 'product_target' ),
+	        'singular_name'       => _x( 'product', 'Post Type Singular Name', 'product_target' ),
+	        'menu_name'           => __( 'Products', 'product_target' ),
+	        'parent_item_colon'   => __( 'Parent product', 'product_target' ),
+	        'all_items'           => __( 'All Products', 'product_target' ),
+	        'view_item'           => __( 'View product', 'product_target' ),
+	        'add_new_item'        => __( 'Add New product', 'product_target' ),
+	        'add_new'             => __( 'Add New', 'product_target' ),
+	        'edit_item'           => __( 'Edit product', 'product_target' ),
+	        'update_item'         => __( 'Update product', 'product_target' ),
+	        'search_items'        => __( 'Search product', 'product_target' ),
+	        'not_found'           => __( 'Not Found', 'product_target' ),
+	        'not_found_in_trash'  => __( 'Not found in Trash', 'product_target' ),
+	    );
+	     
+	// Set other options for Custom Post Type
+	     
+	    $args = array(
+	        'label'               => __( 'Products', 'product_target' ),
+	        'description'         => __( 'Products items', 'product_target' ),
+	        'labels'              => $labels,
+	        'supports'            => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail' ),
+	        'register_meta_box_cb' => array($this,'rating_field_meta_box'),
+	        'hierarchical'        => false,
+	        'public'              => true,
+	        'show_ui'             => true,
+	        'show_in_menu'        => true,
+	        'show_in_nav_menus'   => true,
+	        'show_in_admin_bar'   => true,
+	        'menu_icon'           => 'dashicons-products',
+	        'menu_position'       => 5,
+	        'can_export'          => true,
+	        'has_archive'         => true,
+	        'exclude_from_search' => false,
+	        'publicly_queryable'  => true,
+	        'capability_type'     => 'page',
+	    );
+	     
+	    // Registering your Custom Post Type
+	    register_post_type( 'product', $args );
+	 
+	}
+
+	public function create_target_groups_hierarchical_taxonomy() {
+
+	// Add new taxonomy, make it hierarchical like categories
+	//first do the translations part for GUI
+
+	  $labels = array(
+	    'name' => _x( 'Target groups', 'taxonomy general name' ),
+	    'singular_name' => _x( 'Target groups', 'taxonomy singular name' ),
+	    'search_items' =>  __( 'Search Target groups' ),
+	    'all_items' => __( 'All Target groups' ),
+	    'parent_item' => __( 'Parent Target groups' ),
+	    'parent_item_colon' => __( 'Parent Target groups:' ),
+	    'edit_item' => __( 'Edit Target groups' ), 
+	    'update_item' => __( 'Update Target groups' ),
+	    'add_new_item' => __( 'Add New Target groups' ),
+	    'new_item_name' => __( 'New Target groups Name' ),
+	    'menu_name' => __( 'Target groups' ),
+	  ); 	
+
+	// Now register the taxonomy
+
+	  register_taxonomy('target_groups',array('product'), array(
+	    'hierarchical' => true,
+	    'labels' => $labels,
+	    'show_ui' => true,
+	    'show_admin_column' => true,
+	    'query_var' => true,
+	    'rewrite' => array( 'slug' => 'target_group' ),
+	  ));
+
+	}
+	
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
