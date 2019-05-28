@@ -75,6 +75,8 @@ class Product_target_Public {
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/product_target-public.css', array(), $this->version, 'all' );
 
+		wp_enqueue_style( $this->plugin_name.'_fontawesome', 'https://use.fontawesome.com/releases/v5.8.2/css/all.css', array(), $this->version, 'all' );
+
 	}
 
 	/**

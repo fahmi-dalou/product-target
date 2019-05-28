@@ -112,6 +112,12 @@ class Product_target {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-product_target-i18n.php';
 
 		/**
+		 * The class responsible for creating product list wedgit
+		 * side of the site.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-product_target-wedgit.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-product_target-admin.php';
@@ -128,6 +134,8 @@ class Product_target {
 		add_action( 'init', array($this , 'create_target_groups_hierarchical_taxonomy' ) );
 		add_action( 'save_post', array($this ,'save_rating_field_meta_box_data') );
 		add_filter( 'the_content', array($this ,'rating_field_before_post') );
+		add_action( 'widgets_init', array($this , 'product_list_load_widget' ), 0 );
+
 
 	}
 
@@ -238,6 +246,7 @@ class Product_target {
 
 	}
 
+
 	/**
 	 * Add HTML rating filed to meta box 
 	 *
@@ -322,6 +331,15 @@ class Product_target {
 
 	    return $notice . $content;
 
+	}
+
+	/**
+	 * load product list widget
+	 *
+	 */
+
+	public function product_list_load_widget() {
+	    register_widget( 'product_list' );
 	}
 
 	/**
