@@ -135,6 +135,7 @@ class Product_target {
 		add_action( 'save_post', array($this ,'save_rating_field_meta_box_data') );
 		add_filter( 'the_content', array($this ,'rating_field_before_post') );
 		add_action( 'widgets_init', array($this , 'product_list_load_widget' ), 0 );
+		add_action( 'init', array($this , 'set_cookie' ) );
 
 
 	}
@@ -340,6 +341,19 @@ class Product_target {
 
 	public function product_list_load_widget() {
 	    register_widget( 'product_list' );
+	}
+
+	/**
+	 * save target value
+	 *
+	 */
+	public function set_cookie()
+	{
+		if (isset($_GET["target"])) {
+			if(get_term_by('slug', $_GET["target"], 'target_groups')){
+				setcookie('last_target_group', $_GET["target"] , time() + (86400 * 30), "/");
+			}
+		}
 	}
 
 	/**

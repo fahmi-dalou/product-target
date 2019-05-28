@@ -43,6 +43,16 @@ class product_list extends WP_Widget {
 		// the default product target from setting page
 		$default_term  = esc_attr( get_option('product_target_field') );
 
+		// set last target group value passed by link
+		if(!isset($_COOKIE['last_target_group']) || $_COOKIE['last_target_group'] == "target_that_doesnt_exist") {
+
+		    $last_target_group = "";
+
+		} else {
+
+		    $last_target_group = $_COOKIE['last_target_group'];
+
+		}
 
 		// Verify that the GET has value and not 'target_that_doesnt_exist' is valid.
 		if (isset($_GET["target"])&& $_GET["target"] != "target_that_doesnt_exist") {
@@ -51,6 +61,34 @@ class product_list extends WP_Widget {
 			if(get_term_by('slug', $_GET["target"], 'target_groups')){
 
 				$target = get_term_by('slug', $_GET["target"], 'target_groups')->term_id;
+
+			}else{
+
+				if( $last_target_group != "" && get_term_by('slug', $last_target_group , 'target_groups')  ){
+
+					$target = get_term_by('slug', $last_target_group , 'target_groups');	
+
+				}else{
+
+					if ( $default_term != 0 && $default_term ) {
+
+						$target = $default_term;	
+
+					}else{
+
+						$target = "";	
+
+					}
+					
+					
+				}
+			}
+			
+		}else{
+
+			if( $last_target_group != "" && get_term_by('slug', $last_target_group , 'target_groups')  ){
+
+				$target = get_term_by('slug', $last_target_group , 'target_groups');	
 
 			}else{
 
@@ -63,20 +101,10 @@ class product_list extends WP_Widget {
 					$target = "";	
 
 				}
+				
+				
 			}
 			
-		}else{
-
-			if ( $default_term != 0 && $default_term ) {
-
-				$target = $default_term;	
-
-			}else{
-
-				$target = "";	
-
-			}
-		
 		}
 		// before and after widget arguments are defined by themes
 		echo $args['before_widget'];
@@ -115,7 +143,6 @@ class product_list extends WP_Widget {
 						  )
 						);
 			}
-			
 			$product_query = new WP_Query($args_query);
 
 			// Verify that the query contain products
